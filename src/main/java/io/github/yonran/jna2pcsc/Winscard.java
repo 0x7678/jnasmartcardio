@@ -82,7 +82,7 @@ class Winscard {
 		// uint32_t cbAtr;
 		public int cbAtr;
 		// unsigned char rgbAtr[MAX_ATR_SIZE];
-		public byte[] rgbAtr = new byte[Smartcardio.MAX_ATR_SIZE];
+		public byte[] rgbAtr = new byte[36];
 		public SCardReaderState(){}
 		public SCardReaderState(String szReader) {this.szReader = szReader;}
 		@Override protected List<String> getFieldOrder() {
