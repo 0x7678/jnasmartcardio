@@ -181,5 +181,6 @@ class WinscardConstants {
 	}
 	/** Infinite timeout for SCardGetStatusChange */
 	public static final int INFINITE = 0xffffffff;
+	public static final int MAX_ATR_SIZE = 33;
 	public static final String PNP_READER_ID = "\\\\?PnP?\\Notification";
 }
