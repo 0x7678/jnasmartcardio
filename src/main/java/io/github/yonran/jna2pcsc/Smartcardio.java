@@ -92,6 +92,11 @@ public class Smartcardio {
 		 */
 		private final List<SCardReaderState> zombieReaders;
 		private boolean knownReadersChanged;
+		/**
+		 * Whether to use the PNP device to etect when new readers are plugged
+		 * in. Unfortunately, this is now almost useless, because the smartcard
+		 * service exits and gives errors when there are no readers.
+		 */
 		private final boolean usePnp = true;
 		public JnaCardTerminals(Winscard.WinscardLibInfo libInfo, Winscard.SCardContext scardContext) {
 			this.libInfo = libInfo;
@@ -202,8 +207,9 @@ public class Smartcardio {
 		 * <li>Any old readers are moved from {@link #knownReaders} to
 		 * {@link #zombieReaders}.
 		 * <li>If any change is made, {@link #knownReadersChanged} is set so
-		 * that the JNA array-of-struct can be updated properly.
+		 * that the JNA array-of-struct can be reallocated.
 		 * </ul>
+		 * 
 		 * @return true if a reader was added or removed.
 		 */
 		private boolean updateKnownReaders() throws JnaPCSCException {
