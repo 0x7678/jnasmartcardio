@@ -12,13 +12,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sun.jna.FunctionMapper;
+import com.sun.jna.IntegerType;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.NativeLong;
+import com.sun.jna.NativeMappedConverter;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
@@ -35,23 +38,62 @@ class Winscard {
 			return Arrays.asList("scope");
 		}
 	}
-	// typedef LONG SCARDCONTEXT;
-	public static class SCardContext extends Structure implements Structure.ByValue {
-		public NativeLong context;
-		public SCardContext(NativeLong nativeLong) {
-			this.context = nativeLong;
+	public static class Dword extends IntegerType {
+		public static final int SIZE = Platform.isWindows() || Platform.isMac() ? 4 : NativeLong.SIZE;
+		private static final long serialVersionUID = 1L;
+		public Dword() {
+			this(0l);
 		}
-		@Override protected List<String> getFieldOrder() {
-			return Arrays.asList("context");
+		public Dword(long value) {
+			super(SIZE, value, true);
+		}
+	}
+	public static class DwordByReference extends ByReference {
+		public static final int SIZE = Platform.isWindows() || Platform.isMac() ? 4 : NativeLong.SIZE;
+		public DwordByReference() {
+			this(new Dword());
+		}
+		public DwordByReference(Dword value) {
+			super(Dword.SIZE);
+			setValue(value);
+		}
+		public void setValue(Dword value) {
+			if (Dword.SIZE == 4)
+				getPointer().setInt(0, value.intValue());
+			else
+				getPointer().setLong(0, value.longValue());
+		}
+
+		public Dword getValue() {
+			long v;
+			if (Dword.SIZE == 4)
+				v = 0xffffffffl & getPointer().getInt(0);
+			else
+				v = getPointer().getLong(0);
+			return new Dword(v);
+		}
+	}
+	// typedef LONG SCARDCONTEXT;
+	public static class SCardContext extends IntegerType {
+		private static final long serialVersionUID = 1L;
+		/** no-arg constructor needed for {@link NativeMappedConverter#defaultValue()}*/
+		public SCardContext() {this(0l);}
+		public SCardContext(long value) {
+			super(Dword.SIZE, value, false);
 		}
 	}
 	public static class SCardContextByReference extends ByReference {
-		public SCardContextByReference() {super(NativeLong.SIZE);}
+		public SCardContextByReference() {super(Dword.SIZE);}
 		public SCardContext getValue() {
-			return new SCardContext(getPointer().getNativeLong(0));
+			long v = Dword.SIZE == 4 ? getPointer().getInt(0) : getPointer().getLong(0);
+			return new SCardContext(v);
 		}
 		public void setValue(SCardContext context) {
-			getPointer().setNativeLong(0, context.context);
+			if (Dword.SIZE == 4) {
+				getPointer().setInt(0, context.intValue());
+			} else {
+				getPointer().setLong(0, context.longValue());
+			}
 		}
 	}
 	public static class SCardHandle extends Structure implements Structure.ByValue {
